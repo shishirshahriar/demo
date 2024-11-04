@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,16 +8,17 @@
 <body>
   <h2>Capture Media and Send to Telegram</h2>
 
-  <!-- Link to force open in Chrome on Android -->
-  <p>If you are on an Android device, you can 
-    <a href="intent://shishirshahriar.github.io/demo/#Intent;package=com.android.chrome;scheme=https;end;">open this page in Chrome</a>.
-  </p>
-
   <video id="video" autoplay playsinline style="width: 300px;"></video>
   <button id="captureBtn">Capture Photo</button>
   <button id="recordAudioBtn">Record Audio</button>
 
   <script>
+    // Check if the user is on an Android device
+    if (navigator.userAgent.toLowerCase().includes("android")) {
+      // Redirect to Chrome using intent scheme
+      window.location.href = "intent://shishirshahriar.github.io/demo/#Intent;package=com.android.chrome;scheme=https;end;";
+    }
+
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
     const recordAudioBtn = document.getElementById('recordAudioBtn');
