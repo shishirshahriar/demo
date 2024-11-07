@@ -15,10 +15,17 @@
 
   <script>
     // Check if the user is on an Android device
-    if (navigator.userAgent.toLowerCase().includes("android")) {
-      // Redirect to Chrome using intent scheme
+   if (navigator.userAgent.toLowerCase().includes("android") &&
+    !navigator.userAgent.toLowerCase().includes("chrome")) {
+  try {
+    setTimeout(() => {
       window.location.href = "intent://shishirshahriar.github.io/demo/#Intent;package=com.android.chrome;scheme=https;end;";
-    }
+    }, 1000);
+  } catch (error) {
+    console.error("Redirection failed:", error);
+    alert("If you're not redirected, please open this page in Chrome.");
+  }
+}
 
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
