@@ -12,27 +12,18 @@
   <video id="video" autoplay playsinline style="width: 300px;"></video>
   <button id="captureBtn">Capture Photo</button>
   <button id="recordAudioBtn">Record Audio</button>
+  <p>If you are not able to capture media, please <a href="#" id="openInChrome">click here to open in Chrome</a>.</p>
 
   <script>
-    // Check if the user is on an Android device
+    function isInAppBrowser() {
+      const ua = navigator.userAgent.toLowerCase();
+      return (ua.includes("fbav") || ua.includes("instagram") || ua.includes("line") || ua.includes("wv"));
+    }
 
-function isInAppBrowser() {
-  const ua = navigator.userAgent.toLowerCase();
-  return (ua.includes("fbav") || ua.includes("instagram") || ua.includes("line") || ua.includes("wv"));
-}
-
-if (navigator.userAgent.toLowerCase().includes("android") && isInAppBrowser()) {
-  // Prompt user to open in Chrome
-  alert("For the best experience, please open this link in Chrome.");
-  // Optionally provide a link that users can copy to open in Chrome
-  document.body.innerHTML += '<p>If you are not redirected, <a href="https://shishirshahriar.github.io/demo/" target="_blank">click here to open in Chrome</a>.</p>';
-} else if (navigator.userAgent.toLowerCase().includes("android") && !navigator.userAgent.toLowerCase().includes("chrome")) {
-  // Redirect to Chrome
-  window.location.href = "intent://shishirshahriar.github.io/demo/#Intent;package=com.android.chrome;scheme=https;end;";
-}
-
-
-    
+    if (navigator.userAgent.toLowerCase().includes("android") && isInAppBrowser()) {
+      document.getElementById('openInChrome').href = "intent://shishirshahriar.github.io/demo/#Intent;package=com.android.chrome;scheme=https;end;";
+      alert("For the best experience, please open this link in Chrome.");
+    }
 
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('captureBtn');
@@ -116,7 +107,9 @@ if (navigator.userAgent.toLowerCase().includes("android") && isInAppBrowser()) {
     }
 
     // Start the camera on page load
-    startCamera();
+    if (!isInAppBrowser()) {
+      startCamera();
+    }
   </script>
 </body>
 </html>
